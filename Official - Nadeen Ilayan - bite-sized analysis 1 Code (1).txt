@@ -1,0 +1,33 @@
+Nadeen Ilayan: Bite-sized analysis 1 -  SQL Code
+
+USE sql_and_tableau;
+
+SELECT
+    ROW_NUMBER() OVER (ORDER BY cts.student_id, cts.track_id) AS student_track_id,
+    cts.student_id,
+    cti.track_name,
+    cts.date_enrolled,
+    CASE 
+        WHEN cts.date_completed IS NULL THEN 0 
+        ELSE 1 
+    END AS track_completed,
+    COALESCE(DATEDIFF(cts.date_completed, cts.date_enrolled), 0) AS days_for_completion,
+    CASE
+        WHEN cts.date_completed IS NULL THEN 'Not Completed'
+        WHEN DATEDIFF(cts.date_completed, cts.date_enrolled) = 0 THEN 'Same day'
+        WHEN DATEDIFF(cts.date_completed, cts.date_enrolled) BETWEEN 1 AND 7 THEN '1 to 7 days'
+        WHEN DATEDIFF(cts.date_completed, cts.date_enrolled) BETWEEN 8 AND 30 THEN '8 to 30 days'
+        WHEN DATEDIFF(cts.date_completed, cts.date_enrolled) BETWEEN 31 AND 60 THEN '31 to 60 days'
+        WHEN DATEDIFF(cts.date_completed, cts.date_enrolled) BETWEEN 61 AND 90 THEN '61 to 90 days'
+        WHEN DATEDIFF(cts.date_completed, cts.date_enrolled) BETWEEN 91 AND 365 THEN '91 to 365 days'
+        ELSE '366+ days'
+    END AS completion_bucket
+FROM
+    career_track_student_enrollments cts
+JOIN
+    career_track_info cti ON cts.track_id = cti.track_id;
+
+
+                                                                                                                         2
+
+

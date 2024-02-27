@@ -1,0 +1,70 @@
+Nadeen Ilayan - A1: Analysis of Carrier On-Time Performance Codes 
+
+***Note: Make sure to change "FROM a1_carrier_bucket_nadeenilayan" in code to Professor's table.
+***Note: Please run each code separately, not all at once.  
+
+Code 1: Q1 - Top flights - marketing
+SELECT Year, Marketing_Airline_Network, COUNT(*) AS Total_Flights
+FROM a1_carrier_bucket_nadeenilayan
+GROUP BY Year, Marketing_Airline_Network
+ORDER BY Year, Total_Flights DESC;
+
+Code 2: Q1 - Top flights - operating
+SELECT Year, operating_airline, COUNT(*) AS Total_Flights
+FROM a1_carrier_bucket_nadeenilayan
+GROUP BY Year, operating_airline
+ORDER BY Year, Total_Flights DESC;
+
+Code 3: Q2 - Code with missing data and wrong results
+SELECT DayOfWeek, EXTRACT(HOUR FROM CAST(FlightDate AS timestamp)) AS Hour, AVG(DepDelayMinutes) AS Avg_Dep_Delay
+FROM a1_carrier_bucket_nadeenilayan
+GROUP BY DayOfWeek, EXTRACT(HOUR FROM CAST(FlightDate AS timestamp))
+ORDER BY Avg_Dep_Delay ASC;
+
+Code 4: Q2 - Average delays per weekdays
+SELECT DayOfWeek, 
+
+      ROUND(AVG(departuredelaygroups), 2) AS Avg_Dep_Delay,
+
+        ROUND(AVG(arrivaldelaygroups), 2) AS Avg_Arrival_delay
+
+FROM a1_carrier_bucket_nadeenilayan
+
+WHERE departuredelaygroups IS NOT NULL
+AND arrivaldelaygroups IS NOT NULL
+
+GROUP BY DayOfWeek, EXTRACT(HOUR FROM CAST(FlightDate AS timestamp))
+
+ORDER BY DayOfWeek DESC;
+
+Code 5:Q5 - code with wrong results
+SELECT Origin, COUNT(*) AS Total_Flights, 
+
+       SUM(CASE WHEN WeatherDelay > 0 THEN 1 ELSE 0 END) AS Weather_Delayed_Flights,
+
+       SUM(CASE WHEN WeatherDelay > 0 THEN 1 ELSE 0 END) / COUNT(*) * 100 AS Weather_Delay_Percentage
+
+FROM a1_carrier_bucket_nadeenilayan
+
+GROUP BY Origin
+
+ORDER BY Weather_Delay_Percentage DESC;
+
+Code 6: Q6 - total flights with percentage of weather delays
+SELECT Origin AS Origin_Airport,
+      COUNT(*) AS Total_Flights,
+      SUM(CASE WHEN SecurityDelay > 0 THEN 1 ELSE 0 END) AS Weather_Delayed_Flights,
+      SUM(CASE WHEN SecurityDelay > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS Weather_Delay_Percentage
+FROM a1_carrier_bucket_nadeenilayan
+GROUP BY Origin
+ORDER BY Total_Flights DESC;
+
+Code 7: Q5 and Bonus - total delayed flights and percentage of weather delays
+SELECT Origin AS Origin_Airport,
+      COUNT(*) AS Total_Flights,
+      SUM(CASE WHEN SecurityDelay > 0 THEN 1 ELSE 0 END) AS Weather_Delayed_Flights,
+      SUM(CASE WHEN SecurityDelay > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS Weather_Delay_Percentage
+FROM a1_carrier_bucket_nadeenilayan
+WHERE SecurityDelay IS NOT NULL
+GROUP BY Origin
+ORDER BY Total_Flights DESC;

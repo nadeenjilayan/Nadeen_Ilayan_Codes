@@ -1,0 +1,90 @@
+Nadeen Ilayan - bite-sized analysis 3 
+
+Code 1: 
+
+SELECT 
+    ci.course_title,
+    SUM(sl.minutes_watched) AS total_minutes_watched,
+    (SELECT AVG(course_rating) FROM course_ratings cr WHERE cr.course_id = ci.course_id) AS average_rating
+FROM 
+    course_info ci
+JOIN 
+    student_learning sl ON ci.course_id = sl.course_id
+GROUP BY 
+    ci.course_id
+ORDER BY 
+    total_minutes_watched DESC;
+
+Code 2: 
+
+SELECT 
+    DATE_FORMAT(si.date_registered, '%Y-%m') AS registration_month,
+    COUNT(DISTINCT si.student_id) AS total_registered,
+    COUNT(DISTINCT sl.student_id) AS total_onboarded,
+    COUNT(DISTINCT sl.student_id) / NULLIF(COUNT(DISTINCT si.student_id), 0) AS fraction_onboarded
+FROM 
+    student_info si
+LEFT JOIN 
+    student_learning sl ON si.student_id = sl.student_id AND sl.date_watched IS NOT NULL
+GROUP BY 
+    registration_month
+ORDER BY 
+    registration_month;
+
+Code 3:
+
+SELECT 
+    CASE
+        WHEN sp.purchase_type IS NULL THEN 'Free-plan'
+        ELSE 'Paying'
+    END AS purchase_category,
+    ROUND(COUNT(DISTINCT si.student_id), 2) AS total_students,
+    ROUND(SUM(sl.minutes_watched), 2) AS total_minutes_watched,
+    ROUND(AVG(sl.minutes_watched), 2) AS average_minutes_watched
+FROM
+    student_info si
+        LEFT JOIN
+    student_learning sl ON si.student_id = sl.student_id
+        LEFT JOIN
+    student_purchases sp ON si.student_id = sp.student_id
+GROUP BY purchase_category
+ORDER BY average_minutes_watched DESC;
+
+Code 4: 
+
+WITH DataPerMonth AS (
+    SELECT 
+        YEAR(sl.date_watched) AS watch_year,
+        MONTH(sl.date_watched) AS watch_month,
+        SUM(sl.minutes_watched) AS total_minutes_watched
+    FROM 
+        student_learning sl
+    GROUP BY 
+        watch_year, 
+        watch_month
+)
+SELECT 
+    watch_year,
+    watch_month,
+    total_minutes_watched,
+    total_minutes_watched - LAG(total_minutes_watched) OVER (ORDER BY watch_year, watch_month) AS change_per_month
+FROM 
+    DataPerMonth
+ORDER BY 
+    watch_year, 
+    watch_month;
+
+Code 5: 
+
+SELECT 
+    si.student_country,
+    COUNT(DISTINCT si.student_id) AS number_of_students,
+    SUM(sl.minutes_watched) AS total_minutes_watched
+FROM 
+    student_info si
+LEFT JOIN 
+    student_learning sl ON si.student_id = sl.student_id
+GROUP BY 
+    si.student_country
+ORDER BY 
+    number_of_students DESC, total_minutes_watched DESC;
